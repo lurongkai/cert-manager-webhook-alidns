@@ -1,6 +1,5 @@
 # ACME webhook for alidns
 
-
 ## Installation
 
 ```bash
@@ -24,14 +23,14 @@ metadata:
   name: cert-manager-webhook-alidns:secret-reader
 rules:
   - apiGroups:
-      - ''
+      - ""
     resources:
-      - 'secrets'
+      - "secrets"
     resourceNames:
-      - 'alidns-credentials'
+      - "alidns-credentials"
     verbs:
-      - 'get'
-      - 'watch'
+      - "get"
+      - "watch"
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -51,7 +50,7 @@ subjects:
 ClusterIssuer
 
 ```yaml
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-prod
@@ -62,26 +61,26 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    - selector: 
-        dnsNames:
-        - '*.example.cn'
-      dns01:
-        webhook:
-          config:
-            accessKeyId: <your alidns accessKeyId>
-            accessKeySecretRef:
-              key: accessKeySecret
-              name: alidns-credentials
-            regionId: "cn-beijing"
-            ttl: 600
-          groupName: acme.lin07.me
-          solverName: alidns
+      - selector:
+          dnsNames:
+            - "*.example.cn"
+        dns01:
+          webhook:
+            config:
+              accessKeyId: <your alidns accessKeyId>
+              accessKeySecretRef:
+                key: accessKeySecret
+                name: alidns-credentials
+              regionId: "cn-beijing"
+              ttl: 600
+            groupName: acme.lin07.me
+            solverName: alidns
 ```
 
 Certificate
 
 ```yaml
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: wildcard-example-cn
@@ -89,7 +88,7 @@ spec:
   secretName: wildcard-example-cn-tls
   renewBefore: 240h
   dnsNames:
-  - '*.example.cn'
+    - "*.example.cn"
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -107,24 +106,22 @@ metadata:
     certmanager.k8s.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
-  - hosts:
-    - '*.example.cn'
-    secretName: wildcard-example-cn-tls
+    - hosts:
+        - "*.example.cn"
+      secretName: wildcard-example-cn-tls
   rules:
-  - host: demo.example.cn
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: backend-service
-          servicePort: 80
+    - host: demo.example.cn
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: backend-service
+              servicePort: 80
 ```
 
 ## Development
 
 ### Running the test suite
-
-
 
 All DNS providers **must** run the DNS01 provider conformance testing suite,
 else they will have undetermined behaviour when used with cert-manager.
